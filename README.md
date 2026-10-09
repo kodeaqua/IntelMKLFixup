@@ -1,5 +1,5 @@
 # !!WARNING!!
-Me (Kaitlyn), or Carnations Botanica is not responsible for any data loss incurred by using this kernel extension. Although it is ***highly*** unlikely, you have been warned.
+Me (Kaitlyn), or Carnations Botanica, and the maintainer of this fork (kodeaqua) are not responsible for any data loss incurred by using this kernel extension. Although it is ***highly*** unlikely, you have been warned.
 
 ## IntelMKLFixup
 Dead-simple Intel(tm) MKL (Math Kernel Library) patcher for macOS, with a twist.
