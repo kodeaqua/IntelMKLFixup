@@ -39,21 +39,22 @@ static const uint8_t replMklServIntelCpuTrueMask[] = {
 
 static mach_vm_address_t orgCsValidateFunc;
 
-void wrapCsValidate(vnode_t vp, const void* data, vm_size_t size) {
+static void wrapCsValidate(vnode_t vp, const void* data, vm_size_t size) {
+	// Scan first: this runs for every validated page, so keep the common (no match) path cheap.
+	if (LIKELY(!KernelPatcher::findAndReplaceWithMask(const_cast<void*>(data), size,
+			findMklServIntelCpuTrue, findMklServIntelCpuTrueMask,
+			replMklServIntelCpuTrue, replMklServIntelCpuTrueMask, 0, 0)))
+		return;
+
+	// Only resolve the path (for logging) once a patch was actually applied.
 	char path[PATH_MAX];
 	int pathlen = PATH_MAX;
-	if (vn_getpath(vp, path, &pathlen)) return;
-	
-	//SYSLOG(MODULE_SHORT, "wrapCsValidate: %s", path);
-	
-	if (UNLIKELY(KernelPatcher::findAndReplaceWithMask(const_cast<void*>(data), size,
-			findMklServIntelCpuTrue, findMklServIntelCpuTrueMask,
-			replMklServIntelCpuTrue, replMklServIntelCpuTrueMask, 0, 0))) {
-		SYSLOG(MODULE_SHORT, "Patched _mkl_serv_intel_cpu_true for \"%s\"", path);
-	}
+	if (vn_getpath(vp, path, &pathlen))
+		path[0] = '\0';
+	SYSLOG(MODULE_SHORT, "Patched _mkl_serv_intel_cpu_true for \"%s\"", path);
 }
 
-void wrapCsValidatePageBigSur(vnode_t vp,
+static void wrapCsValidatePageBigSur(vnode_t vp,
 							  memory_object_t pager,
 							  memory_object_offset_t page_offset,
 							  const void* data,
@@ -64,7 +65,7 @@ void wrapCsValidatePageBigSur(vnode_t vp,
 	wrapCsValidate(vp, data, PAGE_SIZE);
 }
 
-void wrapCsValidateRangeHighSierra(vnode_t vp,
+static void wrapCsValidateRangeHighSierra(vnode_t vp,
 								   memory_object_t pager,
 								   memory_object_offset_t offset,
 								   const void* data,
