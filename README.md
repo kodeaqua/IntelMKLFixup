@@ -12,6 +12,27 @@ This is where IntelMKLFixup comes in, IntelMKLFixup will *invisibly* patch bits 
 ## Requirements
 - [Lilu](https://github.com/acidanthera/Lilu/releases)
 
+## Installation
+1. Install [Lilu](https://github.com/acidanthera/Lilu/releases) and make sure it loads before plugins.
+2. Add `IntelMKLFixup.kext` to `EFI/OC/Kexts` and your `config.plist` (`Kernel -> Add`), after Lilu.
+3. Reboot. With `-imklfxdbg` set, check `log show --predicate 'eventMessage contains "imklfx"'` for `Patched _mkl_serv_intel_cpu_true` lines.
+
+## Boot arguments
+| Argument | Effect |
+| --- | --- |
+| `-imklfxoff` | Disable the plugin |
+| `-imklfxdbg` | Enable debug logging (Debug builds) |
+| `-imklfxbeta` | Allow loading on unsupported (newer) macOS versions |
+
+## Building
+Requires Xcode, [MacKernelSDK](https://github.com/acidanthera/MacKernelSDK) and a built `Lilu.kext` in the project root:
+
+    xcodebuild -jobs 1 -configuration Release
+
+## Limitations
+- Only the `_mkl_serv_intel_cpu_true` check of modern MKL versions is patched; older MKL versions may need more.
+- The patch runs per memory page, so a signature straddling a page boundary is not matched.
+
 ## Credits & Thanks
 - [vit9696](https://github.com/vit9696) (and contributors) for [RestrictEvents](https://github.com/acidanthera/RestrictEvents), which served as the basis for this project.
 - [Tomnic](https://macos86.it/profile/69-tomnic/) for [the original patching guide](https://macos86.it/topic/5489-tutorial-for-patching-binaries-for-amd-hackintosh-compatibility/), which helped point me in the right direction.
